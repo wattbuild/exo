@@ -47,7 +47,7 @@ class Node:
         keypair = get_node_id_keypair()
         node_id = NodeId(keypair.to_peer_id().to_base58())
         session_id = SessionId(master_node_id=node_id, election_clock=0)
-        router = Router.create(keypair)
+        router = Router.create(keypair, listen_address=args.listen_address)
         await router.register_topic(topics.GLOBAL_EVENTS)
         await router.register_topic(topics.LOCAL_EVENTS)
         await router.register_topic(topics.COMMANDS)
@@ -282,6 +282,7 @@ class Args(CamelCaseModel):
     no_worker: bool = False
     no_downloads: bool = False
     fast_synch: bool | None = None  # None = auto, True = force on, False = force off
+    listen_address: str | None = None  # IP address to bind libp2p to (e.g., 10.0.0.4 for Thunderbolt)
 
     @classmethod
     def parse(cls) -> Self:
@@ -341,6 +342,12 @@ class Args(CamelCaseModel):
             action="store_false",
             dest="fast_synch",
             help="Force MLX FAST_SYNCH off",
+        )
+        parser.add_argument(
+            "--listen-address",
+            type=str,
+            default=None,
+            help="IP address to bind libp2p to (e.g., 10.0.0.4 for Thunderbolt). Default: all interfaces",
         )
 
         args = parser.parse_args()

@@ -130,7 +130,7 @@ class Multiaddr:
 
 @typing.final
 class NetworkingHandle:
-    def __new__(cls, identity: Keypair) -> NetworkingHandle: ...
+    def __new__(cls, identity: Keypair, listen_address: builtins.str | None = None) -> NetworkingHandle: ...
     async def connection_update_recv(self) -> ConnectionUpdate:
         r"""
         Receives the next `ConnectionUpdate` from networking.

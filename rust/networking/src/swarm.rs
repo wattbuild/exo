@@ -15,16 +15,23 @@ pub type Swarm = libp2p::Swarm<Behaviour>;
 pub const NETWORK_VERSION: &[u8] = b"v0.0.1";
 pub const OVERRIDE_VERSION_ENV_VAR: &str = "EXO_LIBP2P_NAMESPACE";
 
-/// Create and configure a swarm which listens to all ports on OS
-pub fn create_swarm(keypair: identity::Keypair) -> alias::AnyResult<Swarm> {
+/// Create and configure a swarm which listens on specified address or all interfaces
+pub fn create_swarm(
+    keypair: identity::Keypair,
+    listen_address: Option<&str>,
+) -> alias::AnyResult<Swarm> {
     let mut swarm = SwarmBuilder::with_existing_identity(keypair)
         .with_tokio()
         .with_other_transport(tcp_transport)?
         .with_behaviour(Behaviour::new)?
         .build();
 
-    // Listen on all interfaces and whatever port the OS assigns
-    swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
+    // Listen on specified address or all interfaces, with OS-assigned port
+    let addr = match listen_address {
+        Some(ip) => format!("/ip4/{ip}/tcp/0"),
+        None => "/ip4/0.0.0.0/tcp/0".to_string(),
+    };
+    swarm.listen_on(addr.parse()?)?;
     Ok(swarm)
 }
 
